@@ -6,7 +6,7 @@
 	$result= mysqli_query($connect, $sqlstatement);
 ?>
 
-<body id="page-top">
+<body id="page-top" style="background-color: cornflowerblue;">
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
         <div class="container">
@@ -19,7 +19,7 @@
                 <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
                     <li class="nav-item"><a class="nav-link" href="#participantsRegistered">Participants</a></li>
                     <li class="nav-item"><a class="nav-link" href="#register">Register</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#team">Team</a></li>
+                    <li class="nav-item"><a class="nav-link" href="coach_addVideo.php">Add Video</a></li>
                     <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?logout=true">Logout</a></li>
                 </ul>

@@ -53,69 +53,83 @@ $(document).ready(function() {
     } );
 } );
 
+$(document).on("click", "#editModalButton", function () {
+    console.log('hello');
+    var id = $(this).data('id');
+    var name = $(this).data('name');
+    var email = $(this).data('email');
+    var password = $(this).data('password');
+    var club = $(this).data('club');
+    $(".modal-body #nameCoachModal").val(name);
+    $(".modal-body #emailCoachModal").val(email);
+    $(".modal-body #clubCoachModal").val(club);
+    $(".modal-body #passwordCoachModal").val(password);
+    $(".modal-body #idCoachModal").val(id);
+});
 
-
-// submitting the participant form
 $(function(){
-    $('#SubmitParticipant').click(function(e){
+    $('#submitCoachEdit').click(function(e){
         var valid = this.form.checkValidity();
         
         if(valid){
-            var name = $('#nameParticipant').val();
-            var age = $('#ageParticipant').val();
-            var gender = $('#genderParticipant').val();
-            var katakumite = $('#KataKumiteParticipant').val();
-            var categoriesKata = $('#categoriesKata').val();
-            var categoriesKumite = $('#categoriesKumite').val();
+            var name = $('#nameCoachModal').val();
+            var email = $('#emailCoachModal').val();
+            var club = $('#clubCoachModal').val();
+            var password = $('#passwordCoachModal').val();
+            var id = $('#idCoachModal').val();
+            console.log(id);
         }
         e.preventDefault();
 
-        //for KATA participants
-        $.ajax({
-            type: 'POST',
-            url: 'modules/user/jsregisterparticipants.php',
-            data: {name: name, age: age, gender: gender, katakumite: katakumite, categoriesKata: categoriesKata, categoriesKumite: categoriesKumite},
-            success:function(data){
-                if(data=="Successfully Saved"){
-                    Swal.fire({
-                        title: data,
-                        text: 'Do you want to add more Participants?',
-                        showDenyButton: true,
-                        confirmButtonText: 'Yes',
-                        denyButtonText: 'No',
-                        customClass: {
-                            actions: 'my-actions',
-                            confirmButton: 'order-1',
-                            denyButton: 'order-2',
-                        }
-                        }).then((result) => {
-                        if (result.isConfirmed) {
-                            Swal.fire('Please add more!', '', 'success');
-                            document.getElementById("participant_form").reset();
-                        } 
-                        else if (result.isDenied) {
-                            Swal.fire('Ok!', '', 'success');
-                        }
-                        })
-                }
-                else{
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: data,
-                        showConfirmButton: true
-                    })
-                }
-                
-                
-            },
-            error: function(data){
-                alert('there were errors while doing the operation');
+        Swal.fire({
+            title: 'Edit Record',
+            text: 'Are you sure you want to edit this record?',
+            showDenyButton: true,
+            confirmButtonText: 'Yes',
+            denyButtonText: 'No',
+            customClass: {
+                actions: 'my-actions',
+                confirmButton: 'order-1',
+                denyButton: 'order-2',
             }
-            
-        });
+            }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'modules/user/jsEditCoach.php',
+                    data: {id:id, email:email, name:name, password:password, club:club},
+                    success:function(data){
+                        if(data=="Edited Successfully"){
+                            Swal.fire({
+                                icon: 'success',
+                                title: data,
+                                text: 'Record saved',
+                                showConfirmButton: true
+                            });
+                            setTimeout(function(){location.reload();}, 850); 
+                        }
+                        else{
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data,
+                                showConfirmButton: true
+                            })
+                        }
+                    },
+                    error: function(data){
+                        alert('there were errors while doing the operation');
+                    }
+                    
+                });
+            } 
+            else if (result.isDenied) {
+                Swal.fire('Ok', '', 'success');
+            }
+        })
     });
 });
+
 
 function getScores(){
     var event=$("#EventAdmin").val();

@@ -1,12 +1,13 @@
 <?php 
-    include 'modules/head/headJudge.php';
+    include 'modules/head/head.php';
     include 'database/database.php';
 
-    $sqlstatement="SELECT * FROM participants";
+    $judgeClub = $_SESSION['userlogin']['club'];
+    $sqlstatement="SELECT * FROM participants WHERE club_participant='$judgeClub'";
 	$result= mysqli_query($connect, $sqlstatement);
 ?>
 
-<body id="page-top">
+<body id="page-top" style="background-color: cornflowerblue;">
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
         <div class="container">
@@ -17,7 +18,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="#participantsRegistered">Judge</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php#participantsRegistered">Participants</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php#register">Register</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#AddVideo">Add Video</a></li>
                     <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?logout=true">Logout</a></li>
                 </ul>
@@ -25,27 +28,16 @@
         </div>
     </nav>
     <!-- Masthead-->
-    <header class="masthead">
+    <header class="masthead" style="padding-top: 4%; padding-bottom: 4%;">
         <div class="container">
-            <div class="masthead-subheading">HELLO Sensei <?php echo $_SESSION['userlogin']['name_sensei'];?>!</div><br>
-            <div class="masthead-heading text-uppercase">Welcome to PKTS Tournament Hub</div>
-            <a class="btn btn-primary btn-lg text-uppercase" href="#register">Register Participants Now!</a>
         </div>
     </header>
     <!-- Participants -->
-    <script src="js/registerParticipant_Judge.js"></script>
-    
-    <form id="TheForm" method="post">
-    <input type="hidden" name="name" value="something" />
-    <input type="hidden" name="event" value="something" />
-    <input type="hidden" name="category" value="something" />
-    </form>
-    
-    <section class="page-section bg-light" id="participantsRegistered">
+    <section class="page-section bg-light" id="AddVideo">
         <div class="container">
             <div class="text-center">
-                <h2 class="section-heading text-uppercase">Participants</h2>
-                <h3 class="section-subheading text-muted">Listed are all the participants for every events and categories.</h3>
+                <h2 class="section-heading text-uppercase">Add Video</h2>
+                <h3 class="section-subheading text-muted">Update the entry for your club members by adding their Video.</h3>
             </div>
             <div class="row">
             <table class="table table-striped" data-order='[[ 1, "asc" ]]' data-page-length='25' id="participantsTable">
@@ -56,14 +48,14 @@
                         <th>Category</th>
                         <th>Gender</th>
                         <th>Age Bracket</th>
-                        <th>Club</th>
-                        <th>Judge Them</th>
+                        <th>Video</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                         while($data= mysqli_fetch_assoc($result)){
                     ?>
+                    
                     <tr>
                         <td><?php echo $data['name_participant']?></td>
                         <td><?php echo $data['kata_kumite']?></td>
@@ -99,27 +91,28 @@
                             }
                         ?>
                         </td>
-                        <td><?php echo $data['club_participant']?></td>
-                        <td>
-                            <?php 
-                            $judge = $_SESSION['userlogin']['email'].'AP';
-                            $stmt=$db->prepare("SELECT * FROM score_sheet_ap WHERE name_participant=? and kata_kumite=? and category_participant=?");
-                            $stmt->execute([$data['name_participant'], $data['kata_kumite'], $data['category_participant']]);
-                            $user = $stmt->fetch();
-                        
-                            if(!$user){
-                                echo "<button class='btn btn-success' data-toggle='modal' data-target='.bd-example-modal-lg'>Judge</button>";
-                            }
-                            else if($user){
-                                if(trim(json_encode($user[$judge]),'"')>0){
-                                    echo "<button class='btn btn-secondary' data-toggle='modal' data-target='.bd-example-modal-lg' disabled>Finished</button>";
-                                }
-                                else{
-                                        echo "<button class='btn btn-success' data-toggle='modal' data-target='.bd-example-modal-lg'>Judge</button>";
-                                }
-                            }
-                            ?>
-                            
+                        <div class="modal fade bd-example-modal-lg" id="addVideoModal<?php echo $data['id']?>" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 class="modal-title" id="exampleModalLabel">Participant's Video</h2>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" id="addVideoBody">
+                                        <h4>Please paste the Google Drive link of the Video</h4>
+                                        <input type="text" class="form-control" id="videoLink<?php echo $data['id']?>" placeholder="Paste Google Drive link here!"/><br>
+                                        <button class="btn btn-success" onclick="addVideo(<?php echo $data['id']?>)">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <td><button class="btn btn-primary" data-toggle='modal' data-target='#viewVideoModal' onclick="viewVideo(<?php echo $data['id']?>);"><i class="fa fa-eye"></i></button>
+                            <button class="btn btn-success" data-toggle='modal' data-target='#addVideoModal<?php echo $data['id']?>'><i class="fa fa-edit"></i></button>
+                            <?php if($data['video_link']!=''){
+                                echo '&nbsp;&nbsp;<i class="fa fa-check" style="color:green"></i>';
+                                }?>
                         </td>
                     </tr>	
                     <?php } ?>
@@ -131,14 +124,29 @@
                         <th>Category</th>
                         <th>Gender</th>
                         <th>Age Bracket</th>
-                        <th>Club</th>
-                        <th>Judge Them</th>
+                        <th>Video</th>
                     </tr>
                 </tfoot>
             </table>
             </div>
         </div>
+        <script src="js/registerParticipant.js"></script>
+        <script src="js/ViewAndEditVideo.js"></script>
     </section>
+    <div class="modal fade bd-example-modal-lg" id="viewVideoModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="exampleModalLabel">Participant's Video</h2>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="viewingBody">
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Contact-->
     <section class="page-section" id="contact">
         <div class="container">
@@ -148,22 +156,6 @@
             </div>
         </div>
     </section>
-
-    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title" id="exampleModalLabel">Participant Scoring</h2>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="judgingBody">
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- Footer-->
     <footer class="footer py-4">
         <div class="container">
